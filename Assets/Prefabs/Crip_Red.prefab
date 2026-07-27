@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 3464880058504479080}
   - component: {fileID: -6177027770165046309}
   m_Layer: 0
-  m_Name: Crip_Blue
+  m_Name: Crip_Red
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -68,7 +68,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 9faef4678b7612f4cbbff48607576421, type: 2}
+  - {fileID: 2100000, guid: bdf3fe998053c2b49a969fa3f183efb9, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
