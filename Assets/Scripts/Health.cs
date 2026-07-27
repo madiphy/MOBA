@@ -6,6 +6,7 @@ public class Health : MonoBehaviour
     [Header("Health Settings")]
     [SerializeField] private float maxHealth = 100f;
     [SerializeField] private float currentHealth;
+    [SerializeField] private bool destroyOnDeath = true;
 
     public event Action<float, float> OnHealthChanged;
     public event Action OnDied;
@@ -44,10 +45,19 @@ public class Health : MonoBehaviour
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
     }
 
+    public void RespawnHealth()
+    {
+        currentHealth = maxHealth;
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
+    }
+
     private void Die()
     {
         OnDied?.Invoke();
 
-        Destroy(gameObject);
+        if (destroyOnDeath)
+        {
+            Destroy(gameObject);
+        }
     }
 }

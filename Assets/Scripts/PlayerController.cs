@@ -1,8 +1,10 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(NavMeshAgent))]
+[RequireComponent(typeof(Health))]
 public class PlayerController : MonoBehaviour
 {
     [Header("Attack Settings")]
@@ -10,19 +12,41 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float attackDamage = 25f;
     [SerializeField] private float attackCooldown = 1f;
 
+    [Header("Respawn Settings")]
+    [SerializeField] private Transform respawnPoint;
+    [SerializeField] private float respawnTime = 3f;
+
     private NavMeshAgent _agent;
     private Camera _mainCamera;
+    private Health _health;
     private Health _currentTarget;
     private float _nextAttackTime;
+    private Vector3 _initialPosition;
 
     private void Awake()
     {
         _agent = GetComponent<NavMeshAgent>();
+        _health = GetComponent<Health>();
         _mainCamera = Camera.main;
+        _initialPosition = transform.position;
+    }
+
+    private void OnEnable()
+    {
+        if (_health != null)
+            _health.OnDied += HandleDeath;
+    }
+
+    private void OnDisable()
+    {
+        if (_health != null)
+            _health.OnDied -= HandleDeath;
     }
 
     private void Update()
     {
+        if (_health.IsDead) return;
+
         HandleInput();
         HandleAttackLogic();
     }
@@ -76,5 +100,37 @@ public class PlayerController : MonoBehaviour
                 Debug.Log($"Атака по {_currentTarget.name}! Нанесено урона: {attackDamage}");
             }
         }
+    }
+
+    private void HandleDeath()
+    {
+        Debug.Log("<color=orange>Игрок погиб! Начинается отсчет возрождения...</color>");
+        StartCoroutine(RespawnRoutine());
+    }
+
+    private IEnumerator RespawnRoutine()
+    {
+        _currentTarget = null;
+        _agent.isStopped = true;
+        _agent.ResetPath();
+
+        SetPlayerActive(false);
+
+        yield return new WaitForSeconds(respawnTime);
+
+        Vector3 targetPosition = respawnPoint != null ? respawnPoint.position : _initialPosition;
+        _agent.Warp(targetPosition);
+
+        _health.RespawnHealth();
+        SetPlayerActive(true);
+        _agent.isStopped = false;
+
+        Debug.Log("<color=cyan>Игрок успешно возродился на базе!</color>");
+    }
+
+    private void SetPlayerActive(bool active)
+    {
+        if (TryGetComponent<Renderer>(out var renderer)) renderer.enabled = active;
+        if (TryGetComponent<Collider>(out var col)) col.enabled = active;
     }
 }
